@@ -1,6 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-// https://github.com/NicoHood/PinChangeInterrupt
-#include <PinChangeInterrupt.h>
 
 #define NEO_PIXEL_PIN 9
 #define NUM_LEDS 60
@@ -10,61 +8,86 @@
 
 #define PIN_SWITCH_START 0
 
+#define DEBOUNCE_MS 10
+#define TIMEOUT_MS 120000
+
+#define PIN_PHOTO_SENSE A1
+#define LIGHT_THRESHOLD 500
+
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(
     NUM_LEDS, NEO_PIXEL_PIN, NEO_GRB + NEO_KHZ800);
-
-volatile boolean changed;
-
-void handleSwitchChange() {
-  changed = true;
-}
 
 class Drawer {
   private:
     uint16_t start;
     int switchPin;
+    boolean ledsOn;
+    boolean lastDrawerOpen;
+    unsigned long lastDrawerChangeMillis;
 
-    void set(boolean on) {
-      uint32_t color = on ? strip.Color(255, 255, 0) : strip.Color(0, 0, 0);
-      for (uint16_t i = start; i < start + LEDS_PER_DRAWER; i++) {
-        strip.setPixelColor(i, color);
-      }
-    }
   public:
-    // for array initialization; essentially unused
-    Drawer(): start(0), switchPin(0) {}
-
     Drawer(uint16_t i_start, int i_switchPin):
-        start(i_start), switchPin(i_switchPin) {
-      pinMode(switchPin, INPUT_PULLUP);
-      attachPCINT(
-        digitalPinToPCINT(switchPin), handleSwitchChange, CHANGE);
+        start(i_start),
+        switchPin(i_switchPin),
+        ledsOn(false),
+        lastDrawerOpen(false),
+        lastDrawerChangeMillis(millis()) {
     }
 
-    void updateFromSwitch() {
+    void setup() {
+      pinMode(switchPin, INPUT_PULLUP);
+    }
+
+    boolean update() {
+      boolean ledsChanged = false;
       // pullup + NC switch pressed by drawer
       // therefore HIGH means the drawer is closed means LEDs off
-      set(digitalRead(switchPin) == LOW);
+      boolean drawerOpen = digitalRead(switchPin) == LOW;
+      boolean bright = analogRead(PIN_PHOTO_SENSE) > LIGHT_THRESHOLD;
+      unsigned long t = millis();
+      unsigned long millisSinceDrawerChange = t - lastDrawerChangeMillis;
+
+      if (drawerOpen != lastDrawerOpen) {
+        if (millisSinceDrawerChange > DEBOUNCE_MS && ledsOn != drawerOpen) {
+          ledsOn = drawerOpen;
+          ledsChanged = true;
+        }
+        lastDrawerChangeMillis = t;
+        lastDrawerOpen = drawerOpen;
+      } else if (ledsOn && millisSinceDrawerChange > TIMEOUT_MS) {
+        ledsOn = false;
+        ledsChanged = true;
+      }
+
+      if (ledsChanged) {
+        uint32_t color = ledsOn
+            ? (bright ? strip.Color(255, 255, 0) : strip.Color(100, 50, 0))
+            : strip.Color(0, 0, 0);
+        for (uint16_t i = start; i < start + LEDS_PER_DRAWER; i++) {
+          strip.setPixelColor(i, color);
+        }
+      }
+      return ledsChanged;
     }
 };
 
-Drawer drawers[NUM_DRAWERS];
+Drawer* drawers[NUM_DRAWERS];
 
 void setup() {
   strip.begin();
   for(int i = 0; i < NUM_DRAWERS; i++) {
-    drawers[i] = Drawer(i * LEDS_PER_DRAWER, PIN_SWITCH_START + i);
+    drawers[i] = new Drawer(i * LEDS_PER_DRAWER, PIN_SWITCH_START + i);
+    drawers[i]->setup();
   }
-  changed = true;
+  pinMode(PIN_PHOTO_SENSE, INPUT);
 }
 
 void loop() {
-  if (changed) {
-    delay(10); // debounce
-    for(int i = 0; i < NUM_DRAWERS; i++) {
-      drawers[i].updateFromSwitch();
-    }
+  boolean ledsChanged = false;
+  for(int i = 0; i < NUM_DRAWERS; i++) {
+    ledsChanged |= drawers[i]->update();
+  }
+  if (ledsChanged) {
     strip.show();
-    changed = false;
   }
 }
