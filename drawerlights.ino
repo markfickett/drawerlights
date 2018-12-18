@@ -44,6 +44,9 @@ class Drawer {
       // therefore HIGH means the drawer is closed means LEDs off
       boolean drawerOpen = digitalRead(switchPin) == LOW;
       boolean bright = analogRead(PIN_PHOTO_SENSE) > LIGHT_THRESHOLD;
+      // millis() will roll over every 49.7 days (with 32-bit unsigned long).
+      // Thus if a drawer stands open for a month and a half, the timeout
+      // will reset temporarily.
       unsigned long t = millis();
       unsigned long millisSinceDrawerChange = t - lastDrawerChangeMillis;
 
