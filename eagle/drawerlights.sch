@@ -2571,7 +2571,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="VCC" library="SparkFun-PowerSymbols" deviceset="VCCA" device=""/>
 <part name="U$2" library="SparkFun-PowerSymbols" deviceset="VCCA" device=""/>
 <part name="SUPPLY4" library="SparkFun-PowerSymbols" deviceset="GND2" device=""/>
-<part name="VIN" library="SparkFun-Connectors" deviceset="CONN_02" device=""/>
+<part name="+VIN-" library="SparkFun-Connectors" deviceset="CONN_02" device=""/>
 <part name="SUPPLY6" library="SparkFun-PowerSymbols" deviceset="GND2" device=""/>
 <part name="RAMB10K" library="SparkFun-Resistors" deviceset="10KOHM" device="-HORIZ-1/4W-1%" value="10k"/>
 <part name="RPU30-60K" library="SparkFun-Resistors" deviceset="330OHM" device="-HORIZ-1/10W-5%" value="30-60k"/>
@@ -2582,7 +2582,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="U$1" library="SparkFun-PowerSymbols" deviceset="VCCA" device=""/>
 <part name="JP1" library="adafruit" deviceset="PINHD-1X12" device="-CB"/>
 <part name="SUPPLY3" library="SparkFun-PowerSymbols" deviceset="GND2" device=""/>
-<part name="LEDPWR" library="SparkFun-Connectors" deviceset="CONN_02" device=""/>
+<part name="+LEDPWR-" library="SparkFun-Connectors" deviceset="CONN_02" device=""/>
 <part name="C1" library="SparkFun-Capacitors" deviceset="100UF-POLAR" device="-RADIAL-2.5MM-25V-20%" value="100uF"/>
 <part name="RLED" library="SparkFun-Resistors" deviceset="330OHM" device="-HORIZ-1/10W-5%" value="300-500"/>
 </parts>
@@ -2600,8 +2600,8 @@ Dark = ~50kΩ-1MΩ</text>
 <instance part="SUPPLY2" gate="GND" x="17.78" y="22.86"/>
 <instance part="VCC" gate="G$1" x="5.08" y="83.82"/>
 <instance part="U$2" gate="G$1" x="12.7" y="96.52"/>
-<instance part="SUPPLY4" gate="GND" x="104.14" y="104.14"/>
-<instance part="VIN" gate="G$1" x="96.52" y="109.22"/>
+<instance part="SUPPLY4" gate="GND" x="106.68" y="104.14"/>
+<instance part="+VIN-" gate="G$1" x="116.84" y="111.76" rot="R180"/>
 <instance part="SUPPLY6" gate="GND" x="63.5" y="91.44"/>
 <instance part="RAMB10K" gate="G$1" x="109.22" y="76.2" rot="R270"/>
 <instance part="RPU30-60K" gate="G$1" x="17.78" y="88.9" rot="R90"/>
@@ -2609,11 +2609,11 @@ Dark = ~50kΩ-1MΩ</text>
 <instance part="TPGND" gate="G$1" x="160.02" y="48.26"/>
 <instance part="TPDIV" gate="G$1" x="160.02" y="38.1"/>
 <instance part="TPVREG" gate="G$1" x="160.02" y="60.96"/>
-<instance part="U$1" gate="G$1" x="104.14" y="116.84"/>
+<instance part="U$1" gate="G$1" x="106.68" y="116.84"/>
 <instance part="JP1" gate="G$1" x="124.46" y="50.8"/>
 <instance part="SUPPLY3" gate="GND" x="114.3" y="33.02"/>
-<instance part="LEDPWR" gate="G$1" x="71.12" y="109.22"/>
-<instance part="C1" gate="G$1" x="83.82" y="119.38" rot="R90"/>
+<instance part="+LEDPWR-" gate="G$1" x="142.24" y="111.76" rot="R180"/>
+<instance part="C1" gate="G$1" x="127" y="116.84" rot="R90"/>
 <instance part="RLED" gate="G$1" x="99.06" y="71.12" rot="R90"/>
 </instances>
 <busses>
@@ -2649,16 +2649,17 @@ Dark = ~50kΩ-1MΩ</text>
 <label x="147.32" y="60.96" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="VIN" gate="G$1" pin="2"/>
+<pinref part="+VIN-" gate="G$1" pin="1"/>
+<wire x1="109.22" y1="111.76" x2="106.68" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="U$1" gate="G$1" pin="VCCA"/>
-<wire x1="104.14" y1="111.76" x2="104.14" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="LEDPWR" gate="G$1" pin="2"/>
-<wire x1="104.14" y1="111.76" x2="88.9" y2="111.76" width="0.1524" layer="91"/>
-<junction x="104.14" y="111.76"/>
-<pinref part="C1" gate="G$1" pin="-"/>
-<wire x1="88.9" y1="111.76" x2="78.74" y2="111.76" width="0.1524" layer="91"/>
-<wire x1="88.9" y1="119.38" x2="88.9" y2="111.76" width="0.1524" layer="91"/>
-<junction x="88.9" y="111.76"/>
+<wire x1="106.68" y1="111.76" x2="106.68" y2="116.84" width="0.1524" layer="91"/>
+<pinref part="+LEDPWR-" gate="G$1" pin="1"/>
+<wire x1="109.22" y1="111.76" x2="124.46" y2="111.76" width="0.1524" layer="91"/>
+<junction x="109.22" y="111.76"/>
+<pinref part="C1" gate="G$1" pin="+"/>
+<wire x1="124.46" y1="111.76" x2="134.62" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="124.46" y1="116.84" x2="124.46" y2="111.76" width="0.1524" layer="91"/>
+<junction x="124.46" y="111.76"/>
 </segment>
 </net>
 <net name="MOSI" class="0">
@@ -2739,18 +2740,6 @@ Dark = ~50kΩ-1MΩ</text>
 <label x="147.32" y="48.26" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="VIN" gate="G$1" pin="1"/>
-<pinref part="SUPPLY4" gate="GND" pin="3.3V"/>
-<wire x1="104.14" y1="109.22" x2="104.14" y2="106.68" width="0.1524" layer="91"/>
-<pinref part="LEDPWR" gate="G$1" pin="1"/>
-<wire x1="104.14" y1="109.22" x2="81.28" y2="109.22" width="0.1524" layer="91"/>
-<junction x="104.14" y="109.22"/>
-<pinref part="C1" gate="G$1" pin="+"/>
-<wire x1="81.28" y1="109.22" x2="78.74" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="81.28" y1="119.38" x2="81.28" y2="109.22" width="0.1524" layer="91"/>
-<junction x="81.28" y="109.22"/>
-</segment>
-<segment>
 <pinref part="JP1" gate="G$1" pin="12"/>
 <pinref part="SUPPLY3" gate="GND" pin="3.3V"/>
 <wire x1="121.92" y1="35.56" x2="114.3" y2="35.56" width="0.1524" layer="91"/>
@@ -2758,6 +2747,19 @@ Dark = ~50kΩ-1MΩ</text>
 <wire x1="121.92" y1="60.96" x2="114.3" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="60.96" x2="114.3" y2="35.56" width="0.1524" layer="91"/>
 <junction x="114.3" y="35.56"/>
+</segment>
+<segment>
+<pinref part="SUPPLY4" gate="GND" pin="3.3V"/>
+<wire x1="106.68" y1="106.68" x2="106.68" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="+VIN-" gate="G$1" pin="2"/>
+<wire x1="109.22" y1="109.22" x2="106.68" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="+LEDPWR-" gate="G$1" pin="2"/>
+<wire x1="134.62" y1="109.22" x2="132.08" y2="109.22" width="0.1524" layer="91"/>
+<junction x="109.22" y="109.22"/>
+<pinref part="C1" gate="G$1" pin="-"/>
+<wire x1="132.08" y1="109.22" x2="109.22" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="132.08" y1="116.84" x2="132.08" y2="109.22" width="0.1524" layer="91"/>
+<junction x="132.08" y="109.22"/>
 </segment>
 </net>
 <net name="RST" class="0">
