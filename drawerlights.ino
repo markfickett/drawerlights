@@ -39,7 +39,7 @@ class Drawer {
       pinMode(switchPin, INPUT_PULLUP);
     }
 
-    boolean update(bright) {
+    boolean update(boolean bright) {
       boolean ledsChanged = false;
       // pullup + NC switch pressed by drawer
       // therefore HIGH means the drawer is closed means LEDs off
