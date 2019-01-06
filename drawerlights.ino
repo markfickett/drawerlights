@@ -1,10 +1,11 @@
 #include <Adafruit_NeoPixel.h>
 
-#define NEO_PIXEL_PIN A2
+// Note analog output pins won't drive NeoPixels.
+#define NEO_PIXEL_PIN 0
 #define NUM_LEDS 60
 
 #define NUM_DRAWERS 8
-#define LEDS_PER_DRAWER 4
+#define LEDS_PER_DRAWER 8
 
 #define PIN_SWITCH_START 2
 
