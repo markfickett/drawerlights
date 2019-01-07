@@ -5,7 +5,7 @@
 #define NUM_LEDS 60
 
 #define NUM_DRAWERS 8
-#define LEDS_PER_DRAWER 8
+#define LEDS_PER_DRAWER 7
 
 #define PIN_SWITCH_START 2
 
@@ -14,7 +14,12 @@
 
 #define PIN_PHOTO_SENSE A0
 #define PIN_PHOTO_SENSE_SUPPLY A1
-#define LIGHT_THRESHOLD 500
+// Smaller light-sensor numbers are brighter. Values below this threshold are
+// considered "bright". Approximately:
+//    500   well lit nighttime room
+//    900   shadow in a lit nighttime room
+//    1000  very dark (light from laptop screen)
+#define LIGHT_THRESHOLD 1000
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(
     NUM_LEDS, NEO_PIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -33,7 +38,7 @@ class Drawer {
         switchPin(i_switchPin),
         ledsOn(false),
         lastDrawerOpen(false),
-        lastDrawerChangeMillis(millis()) {
+        lastDrawerChangeMillis(millis() - (DEBOUNCE_MS + 1)) {
     }
 
     void setup() {
@@ -44,7 +49,7 @@ class Drawer {
       // pullup + NC switch pressed by drawer
       // therefore HIGH means the drawer is closed means LEDs off
       boolean drawerOpen = digitalRead(switchPin) == LOW;
-      update(bright, drawerOpen);
+      return update(bright, drawerOpen);
     }
 
     boolean update(boolean bright, boolean drawerOpen) {
@@ -92,10 +97,10 @@ void setup() {
   pinMode(PIN_PHOTO_SENSE, INPUT);
 
   for(int i = 0; i < NUM_DRAWERS; i++) {
-    drawers[i]->update(true /* bright */, true /* drawer open */);
+    drawers[i]->update(true /* bright */, true /* drawer open => on */);
     strip.show();
-    delay(500);
-    drawers[i]->update(true, false);
+    delay(300);
+    drawers[i]->update(true /* bright */, false /* closed => off */);
     strip.show();
   }
 }
@@ -105,11 +110,11 @@ void loop() {
   boolean bright = analogRead(PIN_PHOTO_SENSE) < LIGHT_THRESHOLD;
   digitalWrite(PIN_PHOTO_SENSE_SUPPLY, LOW);
 
-  boolean ledsChanged = false;
+  boolean anyLedsChanged = false;
   for(int i = 0; i < NUM_DRAWERS; i++) {
-    ledsChanged |= drawers[i]->update(bright);
+    anyLedsChanged |= drawers[i]->update(bright);
   }
-  if (ledsChanged) {
+  if (anyLedsChanged) {
     strip.show();
   }
 }
