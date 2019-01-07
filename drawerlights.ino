@@ -41,10 +41,14 @@ class Drawer {
     }
 
     boolean update(boolean bright) {
-      boolean ledsChanged = false;
       // pullup + NC switch pressed by drawer
       // therefore HIGH means the drawer is closed means LEDs off
       boolean drawerOpen = digitalRead(switchPin) == LOW;
+      update(bright, drawerOpen);
+    }
+
+    boolean update(boolean bright, boolean drawerOpen) {
+      boolean ledsChanged = false;
       // millis() will roll over every 49.7 days (with 32-bit unsigned long).
       // Thus if a drawer stands open for a month and a half, the timeout
       // will reset temporarily.
@@ -65,7 +69,7 @@ class Drawer {
 
       if (ledsChanged) {
         uint32_t color = ledsOn
-            ? (bright ? strip.Color(255, 255, 0) : strip.Color(100, 50, 0))
+            ? (bright ? strip.Color(255, 255, 50) : strip.Color(100, 70, 20))
             : strip.Color(0, 0, 0);
         for (uint16_t i = start; i < start + LEDS_PER_DRAWER; i++) {
           strip.setPixelColor(i, color);
@@ -86,11 +90,19 @@ void setup() {
   pinMode(PIN_PHOTO_SENSE_SUPPLY, OUTPUT);
   digitalWrite(PIN_PHOTO_SENSE_SUPPLY, LOW);
   pinMode(PIN_PHOTO_SENSE, INPUT);
+
+  for(int i = 0; i < NUM_DRAWERS; i++) {
+    drawers[i]->update(true /* bright */, true /* drawer open */);
+    strip.show();
+    delay(500);
+    drawers[i]->update(true, false);
+    strip.show();
+  }
 }
 
 void loop() {
   digitalWrite(PIN_PHOTO_SENSE_SUPPLY, HIGH);
-  boolean bright = analogRead(PIN_PHOTO_SENSE) > LIGHT_THRESHOLD;
+  boolean bright = analogRead(PIN_PHOTO_SENSE) < LIGHT_THRESHOLD;
   digitalWrite(PIN_PHOTO_SENSE_SUPPLY, LOW);
 
   boolean ledsChanged = false;
