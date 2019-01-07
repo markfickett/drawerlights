@@ -11,6 +11,7 @@
 
 #define DEBOUNCE_MS 10
 #define TIMEOUT_MS 120000
+#define UPDATE_INTERVAL_MS 10
 
 #define PIN_PHOTO_SENSE A0
 #define PIN_PHOTO_SENSE_SUPPLY A1
@@ -23,14 +24,26 @@
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(
     NUM_LEDS, NEO_PIXEL_PIN, NEO_GRB + NEO_KHZ800);
+const uint32_t COLOR_OFF = strip.Color(0, 0, 0);
 
 class Drawer {
   private:
+    /** Index of first LED used by this drawer. */
     uint16_t start;
+
+    /** Digital input pin to sense whether the drawer's open. */
     int switchPin;
+
+    /**
+     * Should the LEDs currently be on? This allows decoupling LED state from
+     * sensor inputs (for debouncing and timing out).
+     */
     boolean ledsOn;
+
+    /** Parameters from the last update cycle, to avoid extra LED updates. */
     boolean lastDrawerOpen;
     unsigned long lastDrawerChangeMillis;
+    uint32_t lastColor;
 
   public:
     Drawer(uint16_t i_start, int i_switchPin):
@@ -38,7 +51,8 @@ class Drawer {
         switchPin(i_switchPin),
         ledsOn(false),
         lastDrawerOpen(false),
-        lastDrawerChangeMillis(millis() - (DEBOUNCE_MS + 1)) {
+        lastDrawerChangeMillis(millis() - (DEBOUNCE_MS + 1)),
+        lastColor(COLOR_OFF) {
     }
 
     void setup() {
@@ -53,7 +67,6 @@ class Drawer {
     }
 
     boolean update(boolean bright, boolean drawerOpen) {
-      boolean ledsChanged = false;
       // millis() will roll over every 49.7 days (with 32-bit unsigned long).
       // Thus if a drawer stands open for a month and a half, the timeout
       // will reset temporarily.
@@ -63,24 +76,24 @@ class Drawer {
       if (drawerOpen != lastDrawerOpen) {
         if (millisSinceDrawerChange > DEBOUNCE_MS && ledsOn != drawerOpen) {
           ledsOn = drawerOpen;
-          ledsChanged = true;
         }
         lastDrawerChangeMillis = t;
         lastDrawerOpen = drawerOpen;
       } else if (ledsOn && millisSinceDrawerChange > TIMEOUT_MS) {
         ledsOn = false;
-        ledsChanged = true;
       }
+      uint32_t color = ledsOn
+          ? (bright ? strip.Color(255, 255, 50) : strip.Color(100, 70, 20))
+          : COLOR_OFF;
 
-      if (ledsChanged) {
-        uint32_t color = ledsOn
-            ? (bright ? strip.Color(255, 255, 50) : strip.Color(100, 70, 20))
-            : strip.Color(0, 0, 0);
-        for (uint16_t i = start; i < start + LEDS_PER_DRAWER; i++) {
-          strip.setPixelColor(i, color);
-        }
+      if (color == lastColor) {
+        return false;
       }
-      return ledsChanged;
+      for (uint16_t i = start; i < start + LEDS_PER_DRAWER; i++) {
+        strip.setPixelColor(i, color);
+      }
+      lastColor = color;
+      return true;
     }
 };
 
@@ -117,4 +130,5 @@ void loop() {
   if (anyLedsChanged) {
     strip.show();
   }
+  delay(UPDATE_INTERVAL_MS);
 }
