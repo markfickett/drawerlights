@@ -25,6 +25,7 @@
 //    900   shadow in a lit nighttime room
 //    1000  very dark (light from laptop screen)
 #define LIGHT_THRESHOLD 1000
+#define LIGHT_THRESHOLD_LAG 10
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(
     NUM_LEDS, NEO_PIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -101,7 +102,50 @@ class Drawer {
     }
 };
 
+class AnalogSensorWithHysteresis {
+  private:
+    uint16_t inputPin;
+    uint16_t powerPin;
+    uint16_t threshold;
+    uint16_t lag;
+    boolean belowThreshold;
+
+  public:
+    AnalogSensorWithHysteresis(
+        uint16_t i_inputPin,
+        uint16_t i_powerPin,
+        uint16_t i_threshold,
+        uint16_t i_lag)
+        : inputPin(i_inputPin),
+        powerPin(i_powerPin),
+        threshold(i_threshold),
+        lag(i_lag),
+        belowThreshold(false) {}
+
+    void setup() {
+      pinMode(powerPin, OUTPUT);
+      digitalWrite(powerPin, LOW);
+      pinMode(inputPin, INPUT);
+    }
+
+    boolean isBelowThreshold() {
+      digitalWrite(powerPin, HIGH);
+      uint16_t rawAnalogValue = analogRead(inputPin);
+      digitalWrite(powerPin, LOW);
+
+      belowThreshold = belowThreshold ?
+          rawAnalogValue < threshold + lag :
+          rawAnalogValue < threshold - lag;
+      return belowThreshold;
+    }
+};
+
 Drawer* drawers[NUM_DRAWERS];
+AnalogSensorWithHysteresis lightSensor(
+    PIN_PHOTO_SENSE,
+    PIN_PHOTO_SENSE_SUPPLY,
+    LIGHT_THRESHOLD,
+    LIGHT_THRESHOLD_LAG);
 
 void setup() {
   strip.begin();
@@ -109,9 +153,7 @@ void setup() {
     drawers[i] = new Drawer(i * LEDS_PER_DRAWER, PIN_SWITCH_START + i);
     drawers[i]->setup();
   }
-  pinMode(PIN_PHOTO_SENSE_SUPPLY, OUTPUT);
-  digitalWrite(PIN_PHOTO_SENSE_SUPPLY, LOW);
-  pinMode(PIN_PHOTO_SENSE, INPUT);
+  lightSensor.setup();
 
   // Show an initialization pattern: blink each drawer in sequence.
   for(int i = 0; i < NUM_DRAWERS; i++) {
@@ -124,9 +166,7 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(PIN_PHOTO_SENSE_SUPPLY, HIGH);
-  boolean bright = analogRead(PIN_PHOTO_SENSE) < LIGHT_THRESHOLD;
-  digitalWrite(PIN_PHOTO_SENSE_SUPPLY, LOW);
+  boolean bright = lightSensor.isBelowThreshold();
 
   boolean anyLedsChanged = false;
   for(int i = 0; i < NUM_DRAWERS; i++) {
