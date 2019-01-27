@@ -7,11 +7,15 @@
 #define NUM_DRAWERS 8
 #define LEDS_PER_DRAWER 7
 
+// Digital input pin for the first drawer-sensing switch.
+// NUM_DRAWERS sequential pins are used starting with this one.
 #define PIN_SWITCH_START 2
 
-#define DEBOUNCE_MS 10
-#define TIMEOUT_MS 120000
+// Overall switch sensing and LED updating interval.
 #define UPDATE_INTERVAL_MS 10
+#define DEBOUNCE_MS 10
+// LEDs automatically turn off after this long.
+#define TIMEOUT_MS 120000
 
 #define PIN_PHOTO_SENSE A0
 #define PIN_PHOTO_SENSE_SUPPLY A1
@@ -109,6 +113,7 @@ void setup() {
   digitalWrite(PIN_PHOTO_SENSE_SUPPLY, LOW);
   pinMode(PIN_PHOTO_SENSE, INPUT);
 
+  // Show an initialization pattern: blink each drawer in sequence.
   for(int i = 0; i < NUM_DRAWERS; i++) {
     drawers[i]->update(true /* bright */, true /* drawer open => on */);
     strip.show();
