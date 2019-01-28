@@ -2,22 +2,23 @@
 
 LED lighting for dresser drawers, with brightness and hue response to ambient light, and per-drawer switching.
 
+[Demo video](img/drawerlights.webm).
+
 ![completed, light room](img/frontcompletelight.jpg)
 ![completed, dark room](img/frontcompletedark.jpg)
-![completed, video](img/drawerlights.webm)
 
 ## Construction
 
-I started with a full-scale cardboard mockup of the inside of the dresser, so I could leave the dresser assembled while I measured wires and tested the implementation.
+I started with a full-scale cardboard mockup of the inside of the dresser, so I could leave the drawers in the dresser while I measured wires and tested the implementation.
 
-![cardboard mockup, dark room](img/cardboardmockupdark.jpg)
 ![cardboard mockup, lights on](img/cardboardmockuplight.jpg)
+![cardboard mockup, dark room](img/cardboardmockupdark.jpg)
 
-I ended up using a staple gun to secure both lamp wire and servo wires.
+I used finishing nails to attach the switches to small wood blocks (the switches have two convenient mounting holes).
 
 ![inside the dresser](img/inside.jpg)
 
-To avoid crushing the insulation (especially on the servo wire), I made a cardboard shim and guide for the nose of the staple gun.
+I ended up using a staple gun to secure both lamp wire and servo wires. To avoid crushing the insulation (especially on the servo wire), I made a cardboard shim and guide for the nose of the staple gun.
 
 ![staple gun](img/staplegunstandoff.jpg)
 
@@ -36,7 +37,13 @@ The circuit has switches as inputs to detect when the drawers are opened, a volt
 
 I used the free version of EAGLE (see files in the `eagle/` subdirectory), and used its autorouting on the PCB. Although there's a resistor at the control-board end of the data line to the NeoPixels, after burning out one pixel, I also added a resistor at the LED-end of that wire too (as recommended).
 
-![PCB](img/pdb.png)
+![PCB](img/pcb.png)
+
+I used servo wire to connect data and 5V between the sections of LED strip. The servo wire is 22AWG, which is rated to carry 0.92A max and 16 ohms/ft. I used lamp wire to feed power to the ends and center of the LEDs. The lamp wire is 18AWG, which is rated 2.3A max / 6 ohms/ft. Until I added the center supply, I observed flaky data transmission in the middle of the LEDs.
+
+I also used servo wire to connect ground and a digital input to each switch.
+
+![wiring](img/wiring.jpg)
 
 ## Parts
 
@@ -52,8 +59,6 @@ I used the free version of EAGLE (see files in the `eagle/` subdirectory), and u
 The power supply hisses when under low/no load. Between 84mA and 300mA the hiss is audible, but by 600mA it's quiet. Luckily, wood and clothing damps the noise sufficiently. The PSU also has a trim for output voltage. After destroying one NeoPixel strip, I adjusted the voltage from 5V down to 4.90V. (I haven't observed any variation in the output when, for example, running a corded drill off the same outlet as the PSU is plugged into.)
 
 The 60-LED/m NeoPixel strip specification says 3.5A/m at 5V. This setup uses 7 LEDs on each of 8 drawers, and the brightest color displayed is (255, 255, 50) (that is, red and green fully on, and blue fairly dim). With all 56 LEDs displaying that color, the system draws 2.096A at 5V, so in fact a 10A power supply is significantly oversized.
-
-The servo wire is 22AWG, which is rated to carry 0.92A max and 16 ohms/ft; the lamp wire is 18AWG, which is rated 2.3A max / 6 ohms/ft. I ended up feeding both ends and the center of the LEDs using lamp wire; until I added the center supply, I observed flaky data transmission in the middle of the LEDs.
 
 For the control board:
 
